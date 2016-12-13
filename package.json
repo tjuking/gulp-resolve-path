@@ -1,0 +1,30 @@
+{
+  "name": "gulp-resolve-path",
+  "version": "1.0.0",
+  "description": "使用gulp解决编译前后文件路径的问题，目前可支持对html、css和js的解析。resolve the path with gulp.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tjuking/gulp-resolve-path.git"
+  },
+  "keywords": [
+    "gulp",
+    "resolve",
+    "path",
+    "编译",
+    "路径解析"
+  ],
+  "author": "tjuking",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tjuking/gulp-resolve-path/issues"
+  },
+  "homepage": "https://github.com/tjuking/gulp-resolve-path#readme",
+  "dependencies": {
+    "lodash": "^4.17.2",
+    "through2": "^2.0.3"
+  }
+}
