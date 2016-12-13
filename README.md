@@ -3,7 +3,7 @@ gulp插件——解决模板和静态资源编译后相对路径定位的问题�
 
 ### 使用示例
 
-目录结构：
+目录结构示例（静态资源和模板发布后不在同一目录下，需要解决资源定位的问题）：
 
 ```
 --client (源文件目录)
@@ -93,3 +93,5 @@ gulp.task("template", function () {
 });
     
 ```
+
+详情可参考Demo：https://www.npmjs.com/package/gulp-resolve-path-demo
