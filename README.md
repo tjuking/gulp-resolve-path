@@ -1,5 +1,5 @@
 # gulp-resolve-path
-gulp插件——解决编译前后文件路径定位的问题，目前可支持对html、css和js的解析
+gulp插件——解决模板和静态资源编译后相对路径定位的问题，目前可支持对html、css和js的解析
 
 ### 使用示例
 
@@ -13,14 +13,14 @@ gulp插件——解决编译前后文件路径定位的问题，目前可支持�
 --------index.css
 --------index.js
 --------img
-----------banner.png
+----------logo.png
 --public (静态资源编译后的目录)
 ----widget
 ------index
 --------index.css
 --------index.js
 --------img
-----------banner.png
+----------logo.png
 --views (模板编译后的目录)
 ----widget
 ------index.html
@@ -31,8 +31,12 @@ gulp插件——解决编译前后文件路径定位的问题，目前可支持�
 在HTML中定位资源
 
 ```html
-
-    <img src="./img/banner.png"> <!-- => "client/widget/index/img/banner.png" -->
+    
+    <link rel="stylesheet" href="./index.css"/>
+    
+    <img src="./img/logo.png"/>
+    
+    <script src="./index.js"></script>
 
 ```
 
@@ -40,7 +44,7 @@ gulp插件——解决编译前后文件路径定位的问题，目前可支持�
 
 ```javascript
 
-    var img = __uri("./img/banner.png"); // => "client/widget/index/img/banner.png"
+    var logo = __uri("./img/logo.png"); // => "client/widget/index/img/logo.png"
 
 ```
 
@@ -48,8 +52,8 @@ gulp插件——解决编译前后文件路径定位的问题，目前可支持�
 
 ```css
 
-    .banner {
-        background: url("./img/banner.png"); /* => "client/widget/index/img/banner.png" */
+    .logo {
+        background: url("./img/logo.png"); /* => "client/widget/index/img/logo.png" */
     }
 
 ```
@@ -58,39 +62,34 @@ gulp插件——解决编译前后文件路径定位的问题，目前可支持�
 
 ```javascript
 
-    var gulp = require("gulp");
-    var revCollector = require('gulp-rev-collector');
-    var resolvePath = require("gulp-resolve-path");
-    var options = {
-        /*
-        root: process.cwd(),
-        ext: {
-            template: ['html'],
-            script: ['js'],
-            style: ['css', 'less', 'sass']
-        }
-        */
-    };
-    var revOptions = {
-         dirReplacements: { //文件内容里字符串的替换对应关系，也可以使用其它插件来处理
-             "client/widget": "/public/widget"
-         }
-    };
+var gulp = require("gulp");
+var replace = require('gulp-replace');
+var resolvePath = require("gulp-resolve-path");
+var options = {
+    /*
+     root: process.cwd(),
+     ext: {
+     template: ['html'],
+     script: ['js'],
+     style: ['css', 'less', 'sass']
+     }
+     */
+};
 
-    //静态资源的编译发布，这里做了简化处理
-    gulp.task("static", function(){
-        return gulp.src(["client/**/**.png", "client/**/**.css", "client/**/**.js"])
-               .pipe(resolvePath(options))
-               .pipe(revCollector(revOptions))
-               .pipe(gulp.dest("public"));
-    });
+//静态资源的编译发布，这里做了简化处理
+gulp.task("static", function () {
+    return gulp.src(["client/**/**.png", "client/**/**.css", "client/**/**.js"])
+        .pipe(resolvePath(options))
+        .pipe(replace("/client/", "/public/"))
+        .pipe(gulp.dest("public"));
+});
 
-    //模板的编译发布
-    gulp.task("templates", function(){
-        return gulp.src("client/**/**.html")
-               .pipe(resolvePath(options))
-               .pipe(revCollector(revOptions))
-               .pipe(gulp.dest("views"));
-    });
+//模板的编译发布
+gulp.task("template", function () {
+    return gulp.src("client/**/**.html")
+        .pipe(resolvePath(options))
+        .pipe(replace("/client/", "/public/"))
+        .pipe(gulp.dest("views"));
+});
     
 ```
