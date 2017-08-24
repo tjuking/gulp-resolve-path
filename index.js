@@ -160,7 +160,7 @@ function getPathToClient(thePath, filePath) {
 
 //判断是否是相对路径
 function isRelativePath(thePath) {
-    return !(!thePath || path.isAbsolute(thePath) || thePath.indexOf("http://") == 0 || thePath.indexOf("https://") == 0 || thePath.indexOf("<") == 0);
+    return !(!thePath || path.isAbsolute(thePath) || thePath.indexOf("http://") == 0 || thePath.indexOf("https://") == 0 || thePath.indexOf("<") == 0 || thePath.indexOf("data:") == 0);
 }
 
 //获取文件后缀名
