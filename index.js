@@ -1,10 +1,15 @@
 var through2 = require('through2');
 var path = require('path');
 var _ = require('lodash');
+var glob = require('glob');
+var fs = require('fs');
 
 //默认的配置信息
 var options = {
     root: process.cwd(),
+    source: "client", //gulp配置的源目录
+    output: "public", //gulp配置的输出目录
+    manifest: "**-manifest.json", //manifest.json匹配规则
     ext: {
         template: ['html'],
         script: ['js'],
@@ -106,14 +111,48 @@ function extCss(content, filePath) {
 
 //解析js文件
 function extJs(content, filePath) {
-    var reg = /"(?:[^\\"\r\n\f]|\\[\s\S])*"|'(?:[^\\'\n\r\f]|\\[\s\S])*'|(\/\/[^\r\n\f]+|\/\*[\s\S]*?(?:\*\/|$))|\b(__uri)\s*\(\s*("(?:[^\\"\r\n\f]|\\[\s\S])*"|'(?:[^\\'\n\r\f]|\\[\s\S])*')\s*\)/g;
+    var reg = /"(?:[^\\"\r\n\f]|\\[\s\S])*"|'(?:[^\\'\n\r\f]|\\[\s\S])*'|(\/\/[^\r\n\f]+|\/\*[\s\S]*?(?:\*\/|$))|\b(__uri|__inline)\s*\(\s*("(?:[^\\"\r\n\f]|\\[\s\S])*"|'(?:[^\\'\n\r\f]|\\[\s\S])*')\s*\)/g;
     content = content.replace(reg, function (m, comment, type, value) {
         if (type == "__uri") {
             m = getResolveMatchString(value, filePath);
+        } else if (type == "__inline") {
+            m = getResolveMatchString(value, filePath);
+            m = getEmbedOutputContent(getStringValue(m).value);
         }
         return m;
     });
     return content;
+}
+
+//获取源文件对应的产出文件的内容
+function getEmbedOutputContent(sourceFilePath) {
+    sourceFilePath = sourceFilePath.substr(options.source.length + 2); //"/client/widget/head/head.js" => "widget/head/head.js"
+    var outputDir = options.root + '/' + options.output;
+    var manifestArr = glob.sync(outputDir + '/' + options.manifest); //manifest.json
+    var outputFilePath = "";
+    var outputFileData = "";
+    for (var i = 0; i < manifestArr.length; i++) {
+        try {
+            var fileData = fs.readFileSync(manifestArr[i], 'utf8');
+            fileData = JSON.parse(fileData);
+            if (sourceFilePath in fileData) {
+                outputFilePath = fileData[sourceFilePath];
+                break;
+            }
+        } catch (e) {
+            console.error("__inline error: 读取和解析manefist.json失败", e);
+        }
+    }
+    if (!outputFilePath) {
+        console.error("__inline error: 未找到对应的产出文件路径", sourceFilePath);
+    } else {
+        try {
+            outputFileData = fs.readFileSync(outputDir + "/" + outputFilePath, "utf8");
+        } catch (e) {
+            console.error("__inline error: 读取产出文件内容失败", e);
+        }
+    }
+    return outputFileData;
 }
 
 //获得属性值里替换路径后的字符串
